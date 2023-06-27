@@ -1,7 +1,11 @@
+import os
+import sys
 import pyautogui
 import cv2
 import numpy as np
 import time
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from core.sift_compare import sift_compare
 from core.sys_info import get_screen_resolutions
@@ -17,7 +21,7 @@ if main_screen:
 while True:
     screen = np.array(pyautogui.screenshot())
     screen_gray = cv2.cvtColor(screen, cv2.COLOR_BGR2GRAY)
-    result = sift_compare(template, screen_gray)
+    result = sift_compare(template, screen_gray, 0.7, True, True)
     if 0 < result[0] <= main_screen_width and 0 < result[1] <= main_screen_height and result[4] <= main_screen_width and \
             result[5] <= main_screen_height:
         print(result[4], result[5])

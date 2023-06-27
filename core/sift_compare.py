@@ -4,17 +4,21 @@ import numpy as np
 from core.read_img import read_img
 
 
-def sift_compare(fragment_img_path, entire_img_path, threshold=0.6, grayscale=True):
+def sift_compare(fragment_img_path, entire_img_path, threshold=0.6, grayscale=True, downscale=False):
     """
     :param fragment_img_path: 待检测的碎片图片路径
     :param entire_img_path: 待检测的背景图片路径
     :param threshold: 容差，数值越小越精确，范围 0~1.0
     :param grayscale: 是否以灰度模式读取图像，默认为True
+    :param downscale: 是否下采样2倍以损失精度但提高性能
     :return: 匹配到的最小外接矩形的左上角坐标x、y、宽度、高度及中心坐标cx、cy
     """
     # 读取模板图像和全屏截图
     template = read_img(fragment_img_path, grayscale)
     img = read_img(entire_img_path, grayscale)
+    if downscale:
+        template = cv2.pyrDown(template)
+        img = cv2.pyrDown(img)
     # 将模板图像调整为与全屏截图相同的大小
     template = cv2.resize(template, (img.shape[1], img.shape[0]))
     # 提取特征点
@@ -47,6 +51,9 @@ def sift_compare(fragment_img_path, entire_img_path, threshold=0.6, grayscale=Tr
         cx = x + w // 2
         cy = y + h // 2
         cv2.circle(img, (cx, cy), 5, 255, -1)
-        return x, y, w, h, cx, cy
+        if downscale:
+            return x * 2, y * 2, w * 2, h * 2, cx * 2, cy * 2
+        else:
+            return x, y, w, h, cx, cy
     else:
         return 0, 0, 0, 0, 0, 0
